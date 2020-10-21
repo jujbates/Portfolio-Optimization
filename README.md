@@ -5,18 +5,60 @@ Generate an optimized portfolio from the current S&P 500 companies. To optimize 
 Project Setup
 ------------
 
-### Project Virtual Environment  (conda or venv with pip)
+### Project Virtual Environment  (conda)
 
 #### conda
 
-    conda create -y --name port-opt-py37 python==3.7
-    conda install --force-reinstall -y -q --name port-opt-py37 -c conda-forge --file requirements.txt
+   
+
+To start up:
+
+    conda env create --file environment.yml    
     conda activate port-opt-py37
-    ...
+    
+To tear down:
+
     conda deactivate
 
-#### venv with pip
-   Todo: Coming soon...
+
+## The Data Science Method
+
+
+1.   [Problem Identification](https://medium.com/@aiden.dataminer/the-data-science-method-problem-identification-6ffcda1e5152)
+
+2.   [**Data Wrangling**](https://medium.com/@aiden.dataminer/the-data-science-method-dsm-data-collection-organization-and-definitions-d19b6ff141c4) 
+  * Data Collection - Collected data from wikipedia and yahoo finance price dataset. The wikipedia showed us the currect S&P 500 companies and then used their ticker symbols to query yahoo finance adj. close prices.
+      - Load the S&P 500 tickers from wikipedia page
+      - Get S&P 500 Index (^GSPC) as a Bench Mark
+      - Use S&P Symbols to Get Adj Close from Yahoo Finance
+  * Data Organization - Done using cookiecutter template
+  * Data Definition 
+  * Data Cleaning - The S&P 500 data from yahoo finance price is clean and ready for analysis use. So we will use this dataset to setup the protfolio optimizer with proof of concept then use a different data source later if issues arise with historic data.
+ 
+3.   [Exploratory Data Analysis](https://medium.com/@aiden.dataminer/the-data-science-method-dsm-exploratory-data-analysis-bc84d4d8d3f9)
+ * Build data profile tables and plots
+        - Outliers & Anomalies
+ * Explore data relationships
+ * Identification and creation of features
+
+4.   [Pre-processing and Training Data Development](https://medium.com/@aiden.dataminer/the-data-science-method-dsm-pre-processing-and-training-data-development-fd2d75182967)
+  * Create dummy or indicator features for categorical variables
+  * Standardize the magnitude of numeric features
+  * Split into testing and training datasets
+  * Apply scaler to the testing set
+5.   [Modeling](https://medium.com/@aiden.dataminer/the-data-science-method-dsm-modeling-56b4233cad1b)
+  * Create dummy or indicator features for categorical variable
+  * Fit Models with Training Data Set
+  * Review Model Outcomes — Iterate over additional models as needed.
+  * Identify the Final Model
+
+6.   [Documentation](https://medium.com/@aiden.dataminer/the-data-science-method-dsm-documentation-c92c28bd45e6)
+
+  * Review the Results
+  * Present and share your findings - storytelling
+  * Finalize Code 
+  * Finalize Documentation
+
 
 
 ## 
