@@ -3,6 +3,8 @@ import logging
 from pathlib import Path
 from dotenv import find_dotenv, load_dotenv
 
+from get_data import WikipediaData, SlickData, YahooFinanceData
+
 
 def main():
     """
@@ -20,20 +22,24 @@ def main():
     wd = WikipediaData()
     wd.get_raw_data()
     wd.clean_data()
-    w_df = wd.df
-    ticker_list = w_df.Symbol
+    wiki_df = wd.df
+    ticker_list = wiki_df.Symbol
 
     sd = SlickData()
     sd.get_raw_data()
     sd.clean_data()
+    # slack_df = sd.df
 
     yfd_sp500 = YahooFinanceData(ticker_list, 'sp500', start, end)
     yfd_sp500.get_raw_data()
     yfd_sp500.clean_data()
+    # yahoo_sp500_adj_close_df = yfd_sp500.adj_close_df
+    # yahoo_sp500_shares_outstanding_df = yfd_sp500.shares_outstanding_df
 
     yfd_sp500_index = YahooFinanceData(['^GSPC'], 'sp500_index', start, end)
     yfd_sp500_index.get_raw_data()
     yfd_sp500_index.clean_data()
+    # yahoo_sp500_index_adj_close_df = yfd_sp500_index.adj_close_df
 
 if __name__ == '__main__':
     log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'

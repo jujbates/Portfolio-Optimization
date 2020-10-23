@@ -4,15 +4,12 @@ from bs4 import BeautifulSoup
 from yahooquery import Ticker
 import logging
 
-
-from api_sockets import WikipediaSocket, SlickSocket
-
-CURRENT_DIR = os.getcwd()
-PROJECT_DIR = os.path.abspath(os.path.join(os.path.join(CURRENT_DIR, os.pardir), os.pardir))
-
 log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 logging.basicConfig(level=logging.INFO, format=log_fmt)
 logger = logging.getLogger(__name__)
+
+CURRENT_DIR = os.getcwd()
+PROJECT_DIR = os.path.abspath(os.path.join(os.path.join(CURRENT_DIR, os.pardir), os.pardir))
 
 DATA_RAW_DIR = '/data/raw/'
 DATA_INTERIM_DIR = '/data/interim/'
@@ -24,7 +21,7 @@ class WikipediaData:
     """
 
     def __init__(self):
-        self.url = None
+        self.url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
         self.df = None
         self.raw_file_name = 'wiki_sp500_raw.csv'
         self.interim_file_name = 'wiki_sp500_interim.csv'
@@ -37,7 +34,6 @@ class WikipediaData:
         except FileNotFoundError:
             logger.info(f'File does not exist: {self.raw_file_name}')
             logger.info(f'Creating now...')
-            self.url = WikipediaSocket().input_url
             wiki_tables = pd.read_html(self.url)
             self.df = wiki_tables[0]
             self.save_raw_data()
@@ -66,7 +62,6 @@ class SlickData:
     """
 
     def __init__(self):
-        self.res = None
         self.df = None
         self.raw_file_name = 'slick_sp500_raw.csv'
         self.interim_file_name = 'slick_sp500_interim.csv'
@@ -79,8 +74,11 @@ class SlickData:
         except FileNotFoundError:
             logger.info(f'File does not exist: {self.raw_file_name}')
             logger.info(f'Creating now...')
-            self.res = SlickSocket().get()
-            soup = BeautifulSoup(self.res.content, 'lxml')
+            res = requests.get('https://www.slickcharts.com/sp500',
+                               headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) '
+                                                      'AppleWebKit/537.36 (KHTML, like Gecko) '
+                                                      'Safari/537.36'})
+            soup = BeautifulSoup(res.content, 'lxml')
             tables = soup.find_all('table')
             self.df = pd.read_html(str(tables[0]))[0]
             self.save_raw_data()
@@ -124,7 +122,8 @@ class YahooFinanceData:
         # Adjusted Closing Price
         save = False
         try:
-            self.adj_close_df = pd.read_csv(PROJECT_DIR + DATA_RAW_DIR + self.raw_adj_close_file_name)
+            self.adj_close_df = pd.read_csv(PROJECT_DIR + DATA_RAW_DIR + self.raw_adj_close_file_name,
+                                            index_col=['date'])
         except FileNotFoundError:
             logger.info(f'File does not exist: {self.raw_adj_close_file_name}')
             logger.info(f'Creating now...')
@@ -133,7 +132,8 @@ class YahooFinanceData:
 
         # Other Price Date
         try:
-            self.shares_outstanding_df = pd.read_csv(PROJECT_DIR + DATA_RAW_DIR + self.raw_shares_outstanding_file_name)
+            self.shares_outstanding_df = pd.read_csv(PROJECT_DIR + DATA_RAW_DIR + self.raw_shares_outstanding_file_name,
+                                                     index_col=['symbol'])
         except FileNotFoundError:
             logger.info(f'File does not exist: {self.raw_shares_outstanding_file_name}')
             logger.info(f'Creating now...')
@@ -181,13 +181,11 @@ class YahooFinanceData:
         else:
             logger.info(f'No Shares Outstanding for list of symbols.')
 
-
-
-
     def clean_data(self):
         save = False
         try:
-            self.adj_close_df = pd.read_csv(PROJECT_DIR + DATA_INTERIM_DIR + self.interim_adj_close_file_name)
+            self.adj_close_df = pd.read_csv(PROJECT_DIR + DATA_INTERIM_DIR + self.interim_adj_close_file_name,
+                                            index_col=['date'])
         except FileNotFoundError:
             logger.info(f'File does not exist: {self.interim_adj_close_file_name}')
             logger.info(f'Creating now...')
@@ -196,7 +194,7 @@ class YahooFinanceData:
 
         try:
             self.shares_outstanding_df = pd.read_csv(PROJECT_DIR + DATA_INTERIM_DIR
-                                                     + self.interim_shares_outstanding_file_name)
+                                                     + self.interim_shares_outstanding_file_name, index_col=['symbol'])
         except FileNotFoundError:
             logger.info(f'File does not exist: {self.interim_shares_outstanding_file_name}')
             logger.info(f'Creating now...')
