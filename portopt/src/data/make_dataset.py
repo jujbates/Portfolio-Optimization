@@ -2,7 +2,6 @@
 import logging
 from pathlib import Path
 from dotenv import find_dotenv, load_dotenv
-from get_data import WikipediaData, SlickData,YahooFinanceData
 
 
 def main():
