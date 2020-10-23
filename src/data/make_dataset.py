@@ -19,12 +19,22 @@ def main():
     end = "2020-01-01"
 
     wd = WikipediaData()
+    wd.get_raw_data()
+    wd.clean_data()
     w_df = wd.df
     ticker_list = w_df.Symbol
-    SlickData()
-    YahooFinanceData(ticker_list, 'sp500', start, end)
-    YahooFinanceData(['^GSPC'], 'sp500_index', start, end)
 
+    sd = SlickData()
+    sd.get_raw_data()
+    sd.clean_data()
+
+    yfd_sp500 = YahooFinanceData(ticker_list, 'sp500', start, end)
+    yfd_sp500.get_raw_data()
+    yfd_sp500.clean_data()
+
+    yfd_sp500_index = YahooFinanceData(['^GSPC'], 'sp500_index', start, end)
+    yfd_sp500_index.get_raw_data()
+    yfd_sp500_index.clean_data()
 
 if __name__ == '__main__':
     log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'

@@ -109,7 +109,6 @@ class YahooFinanceData:
 
     def __init__(self, ticker_list, ticker_set_name, start_date, end_date):
         self.ticker_list = ticker_list
-        # self.ticker_set_name = ticker_set_name
         self.start_date = start_date
         self.end_date = end_date
         self.raw_adj_close_file_name = f'yahoo_{ticker_set_name}_adj_close_raw.csv'
@@ -120,9 +119,6 @@ class YahooFinanceData:
         self.adj_close_df = None
         self.shares_outstanding_df = None
         self.error_tickers = {}
-
-        self.get_raw_data()
-        self.clean_data()
 
     def get_raw_data(self):
         # Adjusted Closing Price
@@ -175,17 +171,18 @@ class YahooFinanceData:
     def get_raw_data_shares_outstanding(self):
         if self.tickers is None:
             self.tickers = Ticker(self.ticker_list, asynchronous=True)
-
         yf_data_key_stats = self.tickers.key_stats
         bad_ticker_stats = [k for k, v in yf_data_key_stats.items() if isinstance(v, str)]
         [yf_data_key_stats.pop(key) for key in bad_ticker_stats]
-        try:
-            if len(yf_data_key_stats.keys()) > 0:
-                sp500_yf_df = pd.DataFrame.from_dict(yf_data_key_stats).T
-                self.shares_outstanding_df = sp500_yf_df[['sharesOutstanding']]
-                self.shares_outstanding_df.index.name = 'symbol'
-        except ValueError:
-            pass
+        if len(yf_data_key_stats.keys()) > 0:
+            sp500_yf_df = pd.DataFrame.from_dict(yf_data_key_stats).T
+            self.shares_outstanding_df = sp500_yf_df[['sharesOutstanding']]
+            self.shares_outstanding_df.index.name = 'symbol'
+        else:
+            logger.info(f'No Shares Outstanding for list of symbols.')
+
+
+
 
     def clean_data(self):
         save = False
@@ -216,10 +213,13 @@ class YahooFinanceData:
         self.adj_close_df = self.adj_close_df.drop(columns=tickers_with_nan_values)
 
     def clean_data_shares_outstanding(self):
-        error_tickers_list = list(self.error_tickers.keys())
-        tickers_with_nan_values = self.adj_close_df.columns[self.adj_close_df.isna().any()].tolist()
-        [error_tickers_list.append(x) for x in tickers_with_nan_values]
-        self.adj_close_df = self.adj_close_df.drop(columns=tickers_with_nan_values)
+        if self.shares_outstanding_df is not None:
+            error_tickers_list = list(self.error_tickers.keys())
+            tickers_with_nan_values = self.shares_outstanding_df.columns[self.shares_outstanding_df.isna().any()].tolist()
+            [error_tickers_list.append(x) for x in tickers_with_nan_values]
+            self.shares_outstanding_df = self.shares_outstanding_df.drop(columns=tickers_with_nan_values)
+        else:
+            logger.info(f'No Shares Outstanding for list of symbols.')
 
     def save_raw_data(self):
         logger.info(f'Saving all raw data now...')
